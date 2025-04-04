@@ -27,6 +27,7 @@ instance.interceptors.response.use(
 
         //操作失败
 
+
         //异步操作的状态转换为失败
         return Promise.reject(result.data)
 
