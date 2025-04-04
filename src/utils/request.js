@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { showToast } from 'vant';
 const baseURL = '/api';
 //const baseURL = '';
 const instance = axios.create({ baseURL })
@@ -26,7 +26,7 @@ instance.interceptors.response.use(
         }
 
         //操作失败
-
+        showToast('服务异常');
 
         //异步操作的状态转换为失败
         return Promise.reject(result.data)
@@ -34,6 +34,7 @@ instance.interceptors.response.use(
     },
     err => {
 
+        showToast('服务异常');
         return Promise.reject(err);//异步的状态转化成失败的状态
     }
 )

@@ -1,10 +1,8 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import ChatPage from './components/ChatPage.vue';
 </script>
 
 <template>
-  <ChatPage />
   <RouterView />
 </template>
 

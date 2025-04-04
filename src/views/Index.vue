@@ -5,16 +5,15 @@
       <van-list
           v-model:loading="loading"
           :finished="finished"
-          finished-text="没有更多消息了"
+          finished-text="没有更多消息"
           @load="onLoad"
       >
         <van-cell
             v-for="(message, index) in messages"
             :key="index"
-            :title="message.isUser ? '你' : 'AI'"
+            :title="message.isUser ? '你：' : 'AI：'"
             :value="message.content"
             value-align="right"
-            :label="message.time"
         />
       </van-list>
     </div>
@@ -27,21 +26,46 @@
       />
       <van-button @click="sendMessage">发送</van-button>
     </div>
+    <!-- 悬浮购物车按钮 -->
+    <van-button
+        class="floating-cart-button"
+        icon="shopping-cart-o"
+        @click="goToCartPage"
+    ></van-button>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import request from '@/utils/request.js'
+import {onMounted, ref} from 'vue';
+import { useRouter } from 'vue-router'; // 引入 useRouter
+import request from '@/utils/request.js';
+
+
+onMounted(()=>{
+  getHisMsg()
+})
+
+//获取历史会话
+const getHisMsg = () =>{
+  request.get('/ai/getHisMsgLis')
+      .then((res) => {
+        if (res.body) {
+          res.body.forEach(msg=>{
+            messages.value.push({
+              isUser: msg.user,
+              content: msg.content,
+            });
+          })
+        }
+      })
+}
+
 // 模拟对接 AI 聊天助手的函数，你需要替换为真实的 API 调用
 const getAIResponse = async (message) => {
-  const msg = await request.get('/ai/goods/test',{params:{'prompt':message}})
-      .then(res=>{
-        console.log(res)
+  const msg = await request.get('/ai/chat', { params: { msg: message } })
+      .then((res) => {
         return res.body;
-      }).catch(e=>{
-        console.error(e)
-      });
+      })
   return msg;
 };
 
@@ -61,8 +85,7 @@ const sendMessage = async () => {
   // 添加用户消息
   const userMessage = {
     isUser: true,
-    content: inputValue.value,
-    time: new Date().toLocaleTimeString()
+    content: inputValue.value
   };
   messages.value.push(userMessage);
 
@@ -76,7 +99,7 @@ const sendMessage = async () => {
   const aiMessage = {
     isUser: false,
     content: aiResponse,
-    time: new Date().toLocaleTimeString()
+    time: new Date().toLocaleTimeString(),
   };
   messages.value.push(aiMessage);
 };
@@ -87,12 +110,21 @@ const onLoad = () => {
   setTimeout(() => {
     loading.value = false;
     finished.value = true;
-  }, 1000);
+  }, 500);
+};
+
+// 获取路由实例
+const router = useRouter();
+
+// 跳转到购物车页面的函数
+const goToCartPage = () => {
+  router.push('/cart'); // 假设购物车页面的路由路径是 /cart
 };
 </script>
 
 <style scoped>
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -131,5 +163,14 @@ html, body {
 .input-container van-field {
   flex: 1;
   margin-right: 10px;
+}
+
+/* 悬浮购物车按钮样式 */
+.floating-cart-button {
+  position: fixed;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  z-index: 999;
 }
 </style>
